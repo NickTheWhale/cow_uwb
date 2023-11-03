@@ -45,15 +45,12 @@ static dwt_config_t config = {
  *     - byte 1: sequence number, incremented for each new frame.
  *     - byte 2 -> 9: device ID, see NOTE 1 below.
  *     - byte 10/11: frame check-sum, automatically set by DW1000.  */
-static uint8 tx_msg[] = {0x40, 0, 0, 0, 0};
+static uint8 tx_msg[] = {0x40, "T", "A", "G", 0, 0};
 
 #define RX_BUFFER_LENGTH 127
 static uint8 rx_buffer[RX_BUFFER_LENGTH];
 /* Index to access to sequence number of the blink frame in the tx_msg array. */
 #define BLINK_FRAME_SN_IDX 1
-
-/* How long to wait for anchor reply in UUS */
-#define RX_TIMEOUT_UUS 975
 
 /* Inter-frame delay period, in milliseconds. */
 #define TX_DELAY_MS 1000
@@ -84,7 +81,6 @@ int main(void)
 
     /* Configure DW1000. See NOTE 3 below. */
     dwt_configure(&config);
-    dwt_setrxtimeout(RX_TIMEOUT_UUS);
 
     /* Configure DW1000 LEDs */
     dwt_setleds(1);
@@ -101,33 +97,6 @@ int main(void)
         /* Poll DW1000 until TX frame sent event set. See NOTE 5 below. */
         while (!(dwt_read32bitreg(SYS_STATUS_ID) & SYS_STATUS_TXFRS))
         { };
-
-        dwt_rxenable(DWT_START_RX_IMMEDIATE);
-        /* Poll until a frame is properly received or an error/timeout occurs. */
-        uint32 status_reg;
-        while (!((status_reg = dwt_read32bitreg(SYS_STATUS_ID)) & (SYS_STATUS_RXFCG | SYS_STATUS_ALL_RX_ERR)))
-        { };
-
-        if (status_reg & SYS_STATUS_RXFCG)
-        {
-            /* A frame has been received, copy it to our local buffer. */
-            uint32 frame_len = dwt_read32bitreg(RX_FINFO_ID) & RX_FINFO_RXFL_MASK_1023;
-            if (frame_len <= RX_BUFFER_LENGTH)
-            {
-                dwt_readrxdata(rx_buffer, frame_len, 0);
-            }
-
-            LOG_HEXDUMP_DBG(rx_buffer, sizeof(rx_buffer) < frame_len ? sizeof(rx_buffer) : frame_len, "rx_buffer");
-
-            /* Clear good RX frame event in the DW1000 status register. */
-            dwt_write32bitreg(SYS_STATUS_ID, SYS_STATUS_RXFCG);
-        }
-        else
-        {
-            LOG_INF("No rx");
-            /* Clear RX error events in the DW1000 status register. */
-            dwt_write32bitreg(SYS_STATUS_ID, SYS_STATUS_ALL_RX_ERR);
-        }
 
         /* Clear TX frame sent event. */
         dwt_write32bitreg(SYS_STATUS_ID, SYS_STATUS_TXFRS);
