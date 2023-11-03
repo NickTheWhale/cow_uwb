@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "deca_spi.h": "c",
+        "port.h": "c"
+    }
+}
