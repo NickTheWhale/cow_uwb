@@ -1,0 +1,5 @@
+Package    Version
+---------- -------
+pip        23.0.1
+setuptools 65.5.0
+simpy      4.1.1
