@@ -51,22 +51,22 @@ static volatile uint32_t signalResetDone;
 /* @fn    usleep
  * @brief precise usleep() delay
  * */
-#pragma GCC optimize ("O0")
-int usleep(unsigned long usec)
-{
-    int i,j;
-#pragma GCC ivdep
-    for(i=0;i<usec;i++)
-    {
-#pragma GCC ivdep
-        for(j=0;j<2;j++)
-        {
-            // __NOP();
-            // __NOP();
-        }
-    }
-    return 0;
-}
+// #pragma GCC optimize ("O0")
+// int usleep(unsigned long usec)
+// {
+//     int i,j;
+// #pragma GCC ivdep
+//     for(i=0;i<usec;i++)
+//     {
+// #pragma GCC ivdep
+//         for(j=0;j<2;j++)
+//         {
+//             // __NOP();
+//             // __NOP();
+//         }
+//     }
+//     return 0;
+// }
 
 /****************************************************************************//**
  *
